@@ -1,3 +1,11 @@
+#android
+
+/android
+/node_modules
+/ios
+/.bundle
+
+
 # OSX
 #
 .DS_Store

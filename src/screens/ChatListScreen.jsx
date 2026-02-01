@@ -9,10 +9,13 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { userDummyData } from '../data/dummyData';
+import { useSelector } from 'react-redux';
+import { selectUsersWithLastMessage } from '../store/slices/chatSlice';
 
 const ChatListScreen = () => {
   const navigation = useNavigation();
+
+  const users = useSelector(selectUsersWithLastMessage);
 
   const renderItem = ({ item, index }) => (
     <TouchableOpacity
@@ -23,11 +26,18 @@ const ChatListScreen = () => {
       <View style={styles.userInfo}>
         <View style={styles.userHeader}>
           <Text style={styles.userName}>{item.fullName}</Text>
-          <Text style={styles.time}>12:00 PM</Text>
+          <Text style={styles.time}>
+            {item.lastMessageTime
+              ? new Date(item.lastMessageTime).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+              : ''}
+          </Text>
         </View>
         <View style={styles.lastMessageContainer}>
           <Text style={styles.lastMessage} numberOfLines={1}>
-            Last message preview...
+            {item.lastMessage}
           </Text>
           {index < 3 && <View style={styles.onlineDot} />}
         </View>
@@ -41,7 +51,7 @@ const ChatListScreen = () => {
         <Text style={styles.headerTitle}>Chats</Text>
       </View>
       <FlatList
-        data={userDummyData}
+        data={users}
         keyExtractor={item => item._id}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}

@@ -10,14 +10,13 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import {
   messagesDummyData,
   formatMessageTime,
-  imagesDummyData,
 } from '../data/dummyData'; // Using dummy messages
 import {
   ArrowLeft,
@@ -26,8 +25,10 @@ import {
   Send,
   Mic,
   X,
+  FileText,
 } from 'lucide-react-native';
 import TypingIndicator from '../components/TypingIndicator';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const CURRENT_USER_ID = '680f50e4f10f3cd28382ecf9'; // Simulating logged-in user
 
@@ -59,12 +60,32 @@ const ChatRoomScreen = () => {
     }
   }, [inputText]);
 
-  const handlePickImage = () => {
-    // Simulate picking an image
-    const randomImage =
-      imagesDummyData[Math.floor(Math.random() * imagesDummyData.length)];
-    setSelectedImages([...selectedImages, randomImage]);
+  const handlePickImage = async () => {
+    const options = {
+      mediaType: 'photo',
+      selectionLimit: 5,
+    };
+
+    try {
+      const result = await launchImageLibrary(options);
+      if (result.didCancel) return;
+      if (result.errorCode) {
+        Alert.alert('Error', result.errorMessage);
+        return;
+      }
+
+      if (result.assets) {
+        // Map to the format we need (just uri for now, or object)
+        const newImages = result.assets.map(asset => ({ uri: asset.uri }));
+        setSelectedImages([...selectedImages, ...newImages]);
+      }
+    } catch (error) {
+      console.error("Image picker error:", error);
+      Alert.alert("Error", "Failed to pick image");
+    }
   };
+
+
 
   const removeImage = index => {
     const newImages = [...selectedImages];
@@ -83,7 +104,7 @@ const ChatRoomScreen = () => {
         _id: Math.random().toString(),
         senderId: CURRENT_USER_ID,
         receiverId: user?._id,
-        image: img,
+        image: img.uri ? { uri: img.uri } : img, // Handle both object with uri and direct require (if dummy)
         seen: false,
         createdAt: new Date().toISOString(),
       });
@@ -134,6 +155,17 @@ const ChatRoomScreen = () => {
               resizeMode="cover"
             />
           )}
+
+          {item.document && (
+            <View style={styles.documentContainer}>
+              <FileText size={24} color={isMyMessage ? "#FFF" : "#DDD"} />
+              <Text style={[styles.documentName, { color: isMyMessage ? "#FFF" : "#DDD" }]} numberOfLines={1}>
+                {item.document.name}
+              </Text>
+              {/* You might want to add a download icon or functionality here */}
+            </View>
+          )}
+
           {item.text && <Text style={styles.messageText}>{item.text}</Text>}
           <Text style={styles.messageTime}>
             {formatMessageTime(item.createdAt)}
@@ -191,9 +223,10 @@ const ChatRoomScreen = () => {
         {selectedImages.length > 0 && (
           <View style={styles.mediaPreviewContainer}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {/* Images Preview */}
               {selectedImages.map((img, index) => (
-                <View key={index} style={styles.previewImageWrapper}>
-                  <Image source={img} style={styles.previewImage} />
+                <View key={`img-${index}`} style={styles.previewImageWrapper}>
+                  <Image source={img.uri ? { uri: img.uri } : img} style={styles.previewImage} />
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => removeImage(index)}
@@ -207,11 +240,9 @@ const ChatRoomScreen = () => {
         )}
 
         <View style={styles.inputContainer}>
+
           <TouchableOpacity style={styles.iconButton} onPress={handlePickImage}>
             <ImageIcon color="#BBB" size={24} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Smile color="#BBB" size={24} />
           </TouchableOpacity>
 
           <TextInput
@@ -324,6 +355,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 5,
   },
+  documentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    padding: 8,
+    borderRadius: 8,
+  },
+  documentName: {
+    marginLeft: 8,
+    fontSize: 14,
+    maxWidth: 150,
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -363,7 +407,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   mediaPreviewContainer: {
-    height: 80,
+    height: 100,
     padding: 10,
     backgroundColor: '#27273A',
     borderBottomWidth: 1,
@@ -372,22 +416,28 @@ const styles = StyleSheet.create({
   previewImageWrapper: {
     marginRight: 10,
     position: 'relative',
+    width: 60,
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   previewImage: {
     width: 60,
     height: 60,
     borderRadius: 8,
   },
+
   removeImageButton: {
     position: 'absolute',
-    top: -5,
-    right: -5,
+    top: 0,
+    right: 0,
     backgroundColor: '#EF4444',
     borderRadius: 10,
     width: 18,
     height: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1
   },
 });
 
