@@ -3,12 +3,12 @@ import authReducer from './slices/authSlice';
 import chatReducer from './slices/chatSlice';
 
 export const store = configureStore({
-    reducer: {
-        auth: authReducer,
-        chat: chatReducer,
-    },
-    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware({
-            serializableCheck: false, // For non-serializable data (like images in dummy data if any)
-        }),
+  reducer: {
+    auth: authReducer,
+    chat: chatReducer,
+  },
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: false, // For non-serializable data (like images in dummy data if any)
+    }),
 });

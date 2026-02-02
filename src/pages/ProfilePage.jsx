@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import assets from "../assets/assets";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import assets from '../assets/assets';
 
 const ProfilePage = () => {
   const [selectedImg, setSelectedImg] = useState(null);
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("Hello...");
+  const [name, setName] = useState('');
+  const [bio, setBio] = useState('Hello...');
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    navigate("/");
+    navigate('/');
   };
 
   return (
@@ -33,7 +33,7 @@ const ProfilePage = () => {
             className="flex items-center gap-3 cursor-pointer"
           >
             <input
-              onChange={(e) => setSelectedImg(e.target.files[0])}
+              onChange={e => setSelectedImg(e.target.files[0])}
               type="file"
               id="avatar"
               accept=".png, .jpg, .jpeg"
@@ -46,13 +46,13 @@ const ProfilePage = () => {
                   : assets.avatar_icon
               }
               alt=""
-              className={`w-12 h-12 ${selectedImg && "rounded-full"}`}
+              className={`w-12 h-12 ${selectedImg && 'rounded-full'}`}
             />
             Upload Profile Image
           </label>
 
           <input
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
             value={name}
             type="text"
             required
@@ -62,7 +62,7 @@ const ProfilePage = () => {
           />
 
           <textarea
-            onChange={(e) => setBio(e.target.value)}
+            onChange={e => setBio(e.target.value)}
             value={bio}
             placeholder="write bio"
             required
